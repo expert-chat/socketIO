@@ -11,4 +11,4 @@ const server = http.createServer(app);
 socketInit(server); // Initialize Socket.IO with server
 
 const PORT = process.env.PORT || 6000;
-server.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
+server.listen(PORT, () => logger.info(`Server running on port http://localhost:${PORT}`));

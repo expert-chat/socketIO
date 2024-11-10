@@ -7,5 +7,5 @@ export function authenticate(socket, next) {
 }
 
 function isValidToken(token) {
-    return token == process.env.PORT;
+    return token == process.env.SOCKET_IO_TOKEN;
 }
