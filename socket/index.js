@@ -11,6 +11,7 @@ export default function socketInit(server) {
     });
 
     io.use(authenticate); // Apply middleware
+
     io.on('connection', (socket) => {
         console.log(`User connected: ${socket.id}`);
         registerEvents(socket, io); // Register events

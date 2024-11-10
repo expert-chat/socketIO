@@ -7,6 +7,5 @@ export function authenticate(socket, next) {
 }
 
 function isValidToken(token) {
-    // Implement token verification logic
-    return !!token; // Example: token should exist
+    return token == process.env.PORT;
 }
