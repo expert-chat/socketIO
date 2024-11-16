@@ -1,66 +1,46 @@
-// Store userId as key and details including socketId and timeout ID
-const users = {};
+const users = new Map();
 
 export default function registerEvents(socket, io) {
-    // Parse the user JSON data from the query params
+
     const user = JSON.parse(socket?.handshake?.query?.user);
 
     if (user?.id) {
-        // Check if the user is already in the users object
-        if (users[user.id] && users[user.id].disconnectTimeout) {
-            // Clear any pending disconnection if the user reconnects within 5 seconds
-            clearTimeout(users[user.id].disconnectTimeout);
-            console.log(`User ${user.name} reconnected. Cancelled disconnect timeout.`);
+        if (users.has(user.id)) {
+            const existingUser = users.get(user.id);
+            if (existingUser.disconnectTimeout) {
+                clearTimeout(existingUser.disconnectTimeout);
+                console.log(`User ${user.name} reconnected. Cancelled disconnect timeout.`);
+            }
         }
 
-        // Store or update the user's socketId and clear disconnectTimeout
-        users[user.id] = {
+        users.set(user.id, {
             socketId: socket.id,
             disconnectTimeout: null,
-        };
+        });
 
-        const message = `User (${user.name}) connected with socket ID: (${socket.id})`;
-        console.log(message);
-
-        socket.broadcast.emit('userConnected', message);
+        console.log(`User (${user.name}) connected with socket ID: (${socket.id})`);
+        socket.broadcast.emit('userConnected', `User (${user.name}) connected.`);
     }
 
-    socket.on('saveParticipants', (participants) => {
+    socket.on('setParticipants', (participants) => {
         const authId = user?.id;
 
-        // Check if the user exists in the users object
-        if (authId && users[authId] && users[authId].socketId) {
-            console.log("=============================");
-            console.log(`Checking online status for participants:`);
-            console.log("=============================");
-
-            // Filter out the online participants
-            const onlineParticipants = participants.filter(participant => {
-                return users[participant] && users[participant].socketId; // Check if user is online
-            });
-
+        if (authId && users.has(authId)) {
+            const onlineParticipants = participants.filter(participant => users.has(participant));
             console.log(`Online participants:`, onlineParticipants);
-
-            // Emit only online participants back to the client
-            socket.emit('onlineParticipants', onlineParticipants);  // Emit back only the online participants
+            socket.emit('onlineParticipants', onlineParticipants);
         }
     });
 
-
-    socket.on('sendMessage', (data) => {
-        console.dir({data});
-    });
-
-
-    // Handle user disconnection with a delay
     socket.on('disconnect', () => {
-        if (user?.id && users[user.id]) {
-            users[user.id].disconnectTimeout = setTimeout(() => {
+        if (user?.id && users.has(user.id)) {
+            const disconnectTimeout = setTimeout(() => {
                 console.log(`User ${user.id} disconnected (Socket ID: ${socket.id}) after delay.`);
-                socket.broadcast.emit('userDisconnected', `User with ID: (${user.id}) has disconnected.`);
-                delete users[user.id];
+                socket.broadcast.emit('userDisconnected', `User (${user.id}) disconnected.`);
+                users.delete(user.id);
             }, 5000);
+
+            users.set(user.id, {...users.get(user.id), disconnectTimeout});
         }
     });
 }
-
