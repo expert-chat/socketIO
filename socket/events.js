@@ -15,22 +15,18 @@ export default function registerEvents(socket, io, users, user) {
         const authId = user?.id;
         const participants = chat?.participants;
 
-        console.log({participants});
         if (authId && users.has(authId) && Array.isArray(participants)) {
+
+            /* send to participants */
             participants.forEach((participant) => {
                 if (participant && users.has(participant.id)) {
                     const targetSocket = users.get(participant.id);
                     if (targetSocket["socketId"]) {
-                        console.log("======================");
-                        console.dir({participant});
-                        console.dir({chat});
-                        console.dir({message});
-                        console.dir({targetSocket: targetSocket["socketId"]});
-                        console.log("======================");
                         socket.to(targetSocket["socketId"]).emit('haveNewMessage', message, chat);
                     }
                 }
             });
+
         } else {
             console.error("empty Participants");
         }
