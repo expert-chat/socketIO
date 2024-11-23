@@ -17,7 +17,6 @@ export default function registerEvents(socket, io, users, user) {
         });
     };
 
-    // Get online participants
     socket.on('getOnlineParticipants', (participants) => {
         const authId = user?.id;
 
@@ -35,7 +34,6 @@ export default function registerEvents(socket, io, users, user) {
         socket.emit('onlineParticipants', onlineParticipants);
     });
 
-    // Send message to others
     socket.on('messageSent', (message, chat) => {
         if (!chat?.participants || !message) {
             console.error("Invalid chat or message.");
@@ -45,7 +43,6 @@ export default function registerEvents(socket, io, users, user) {
         emitEventToParticipants(chat.participants, 'haveNewMessage', message, chat);
     });
 
-    // Notify message read by
     socket.on('messageReadBy', (auth, message) => {
         const senderId = message?.sender?.id;
 
@@ -60,7 +57,6 @@ export default function registerEvents(socket, io, users, user) {
         }
     });
 
-    // Notify last chat message read by
     socket.on('lastChatMessageReadBy', (auth, chat) => {
         if (!chat?.participants) {
             console.error("Invalid chat participants.");
@@ -70,7 +66,6 @@ export default function registerEvents(socket, io, users, user) {
         emitEventToParticipants(chat.participants, 'haveLastChatMessageRead', auth, chat);
     });
 
-    // Notify typing status
     socket.on('isTyping', (auth, chat) => {
         if (!chat?.participants) {
             console.error("Invalid chat participants.");
@@ -80,7 +75,6 @@ export default function registerEvents(socket, io, users, user) {
         emitEventToParticipants(chat.participants, 'haveIsTyping', auth, chat);
     });
 
-    // Notify stop typing status
     socket.on('isStopTyping', (auth, chat) => {
         if (!chat?.participants) {
             console.error("Invalid chat participants.");
@@ -90,7 +84,24 @@ export default function registerEvents(socket, io, users, user) {
         emitEventToParticipants(chat.participants, 'haveStopIsTyping', auth, chat);
     });
 
-    // Handle disconnect
+    socket.on('videoCallingRequest', (caller, chat) => {
+        if (!chat?.participants) {
+            console.error("Invalid chat participants.");
+            return;
+        }
+
+        emitEventToParticipants(chat.participants, 'haveVideoCalling', caller, chat);
+    });
+
+    socket.on('stopVideoCallingRequest', (chat) => {
+        if (!chat?.participants) {
+            console.error("Invalid chat participants.");
+            return;
+        }
+
+        emitEventToParticipants(chat.participants, 'haveStopVideoCalling');
+    });
+
     socket.on('disconnect', () => {
         if (user?.id && users.has(user.id)) {
             console.log(`User disconnected: ${user.id}`);
