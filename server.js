@@ -8,6 +8,11 @@ dotenv.config(); // Load environment variables from .env file
 const app = express();
 const server = http.createServer(app);
 
+app.get('/', (req, res) => {
+    res.send('Node.js app is running!');
+});
+
+
 socketInit(server); // Initialize Socket.IO with server
 
 const PORT = process.env.PORT || 6000;
