@@ -6,14 +6,14 @@ import * as dotenv from "dotenv";
 
 dotenv.config(); // Load environment variables from .env file
 const app = express();
-const server = http.createServer(app);
+const index = http.createServer(app);
 
 app.get('/', (req, res) => {
     res.send('Node.js app is running!');
 });
 
 
-socketInit(server); // Initialize Socket.IO with server
+socketInit(index); // Initialize Socket.IO with server
 
 const PORT = process.env.PORT || 6000;
-server.listen(PORT, () => logger.info(`Server running on port http://localhost:${PORT}`));
+index.listen(PORT, () => logger.info(`Server running on port http://localhost:${PORT}`));
