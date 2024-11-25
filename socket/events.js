@@ -84,13 +84,13 @@ export default function registerEvents(socket, io, users, user) {
         emitEventToParticipants(chat.participants, 'haveStopIsTyping', auth, chat);
     });
 
-    socket.on('videoCallingRequest', (caller, chat) => {
+    socket.on('videoCallingRequest', (caller, chat, rtcProps) => {
         if (!chat?.participants) {
             console.error("Invalid chat participants.");
             return;
         }
 
-        emitEventToParticipants(chat.participants, 'haveVideoCalling', caller, chat);
+        emitEventToParticipants(chat.participants, 'haveVideoCalling', caller, chat, rtcProps);
     });
 
     socket.on('stopVideoCallingRequest', (chat) => {
